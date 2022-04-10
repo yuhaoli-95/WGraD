@@ -1,0 +1,9 @@
+OptiPara.NP = 80;
+OptiPara.F = 0.5;
+OptiPara.CR = 0.5;
+OptiPara.mutationStrategy = 2;
+OptiPara.crossStrategy = 1;
+OptiPara.maxdistance = 10^-8;
+OptiPara.tolerance = 10^-8;
+OptiPara.stopgeneration = 50;
+OptiPara.CheckHill = 0;
