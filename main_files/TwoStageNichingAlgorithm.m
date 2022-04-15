@@ -3,6 +3,12 @@ tic
 ClusterPara = GenerateSamples(ClusterPara);%sampling:(1*Dim)parameter | (Dim+1)fitness  sampledata  testdata
 % NWPara.AnalysisData = [NWPara.AnalysisData; sample];
 %%
+% NBC2, WGraD1 and WGraD2 have the same framework to get spanning trees:
+% 1. [nodelist, nodelist2] = XXXXClimbing(input, output);
+%   'nodelist' and 'nodelist2 ' are the adjacency matrix: [index of start point, distance, index of end point]
+%   each row is an directed edge with distance
+% 2. NewNetWork = CreateHeap(nodelist, length(output));
+%   find sub-graphs using DFS(Depth-First-Search) algotighm
 ClusterPara.FEs = 0;
 if strcmp(method, 'NBC2')
     [networkInfo, ClusterPara] = NBC2(ClusterPara);

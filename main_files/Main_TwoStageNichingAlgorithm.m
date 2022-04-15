@@ -1,5 +1,5 @@
 function Main_TwoStageNichingAlgorithm(Problem, lb, ub, Dim, MaxFes, method, NP, Optimizer, FolderName, RepIth)
-% the main process of the niche algorithm
+% the main process of niche algorithm
 % input: 
 % Problem, lb, ub, Dim, MaxFes: parameters of one benchmark function; 
 % Optimizer: DE/CMA-ES; 
@@ -10,7 +10,7 @@ tic
 warning off
 % obtain the optimization method parameters and cluster method parameters
 [ClusterPara, OptiPara] = SetParameter(Optimizer, NP, Problem, MaxFes, lb, ub, Dim);
-rng(RepIth);
+rng(RepIth, 'twister');
 % set data file path
 DataFileFolderName = [FolderName, '/']; CheckFolder(DataFileFolderName);
 % check benchmark function version

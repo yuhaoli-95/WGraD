@@ -2,6 +2,7 @@ function [nodelist, nodelist2] = NBC2Climbing(input, output)
 theta = 2;
 [samnum, Dim] = size(input);
 nodelist = zeros(samnum, 3);
+% distance matrix of each point
 DisGraph = pdist2(input, input);
 for samith = 1 : samnum
     Parent = 0;
@@ -12,6 +13,7 @@ for samith = 1 : samnum
     %         disTemp = sum(abs((repmat(pointI, samnum, 1) - input)) , 2)';%Manhattan Distance
     disTemp(disTemp == 0) = NaN;
     [dismat, disindex] = sort(disTemp);
+    % find the nearest-better point
     for disindexIth = 1 : samnum
         if output(disindex(disindexIth)) > fitnessI
             disEdge = dismat(disindexIth);
