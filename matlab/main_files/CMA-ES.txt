@@ -1,0 +1,3 @@
+OptiPara.stopgeneration = '10 + ceil(30 * nVar / lambda)';%
+OptiPara.tolerance = 10^-8;
+OptiPara.CheckHill = 0;
