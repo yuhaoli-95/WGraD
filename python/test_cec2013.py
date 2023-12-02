@@ -3,7 +3,7 @@
 '''
 Author       : Li Yuhao
 Date         : 2023-12-01 09:38:30
-LastEditTime : 2023-12-02 12:50:50
+LastEditTime : 2023-12-02 19:52:02
 LastEditors  : your name
 Description  : 
 FilePath     : \\WGraD\\python\\test_cec2013.py
@@ -75,16 +75,16 @@ def cec2013_test(func_id, random_seed):
         fes += num_sample
         # apply cluster method
         wgrad = WGraD(init_pop, init_fitness, f.evaluate)
-        cluster_list = wgrad.WGrad_2()
+        cluster_info = wgrad.WGrad_2()
         # optimize
-        for item in cluster_list:
+        for cluster in cluster_info:
             count += 1
             # instance optimizer
             de = DifferentialEvolution(
-                init_pop = init_pop[item],
-                init_fitness = init_fitness[item],
+                init_pop = cluster.X,
+                init_fitness = cluster.fitness,
                 fitness_func = f.evaluate,
-                bounds = [np.min(init_pop[item], axis = 0), np.max(init_pop[item], axis = 0)],
+                bounds = [np.min(cluster.X, axis = 0), np.max(cluster.X, axis = 0)],
                 max_fes = f.get_maxfes() - fes,
                 pop_size = 50 if dimension in [10, 20] else 20,
                 F = 0.5,
@@ -116,15 +116,7 @@ def cec2013_test(func_id, random_seed):
             if found_new_hill:
                 found_optima.append(de.best_x)
                 fit_found_optima.append(de.best_fitness)
-            # else:
-            #     found_new_hill, fes = hill_valley_test(
-            #         found_optima=found_optima,
-            #         fit_found_optima = fit_found_optima,
-            #         ind_to_test = de.best_x,
-            #         fit_ind_to_test = de.best_fitness,
-            #         fes = fes,
-            #         fitness_func = f.evaluate
-            #     )
+                    
     print(count)
     # check how many global optima found using how_many_goptima function
     recall = [0] * 5
