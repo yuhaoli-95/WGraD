@@ -3,7 +3,7 @@
 '''
 Author       : Li Yuhao
 Date         : 2023-11-29 15:43:08
-LastEditTime : 2023-12-02 21:50:13
+LastEditTime : 2023-12-03 22:36:44
 LastEditors  : your name
 Description  : 
 FilePath     : \\WGraD\\python\\WGraD\\WGraD.py
@@ -26,7 +26,14 @@ class ClusterResult:
     def __repr__(self) -> str:
         return f"<Cluster Result> {self.num_dimension} dimension {self.num_samples} samples"
 
-    def __init__(self, indices: List[int], X: np.ndarray, fitness: np.ndarray, num_dimension: int) -> None:
+    def __init__(
+            self, 
+            indices: List[int], 
+            edges: List[Tuple[np.ndarray, np.ndarray]], 
+            X: np.ndarray, 
+            fitness: np.ndarray, 
+            num_dimension: int
+        ) -> None:
         assert X.shape[1] == num_dimension
         self._indices = indices
         self._X = X
@@ -34,6 +41,7 @@ class ClusterResult:
 
         self.num_samples = X.shape[0]
         self.num_dimension = num_dimension
+        self.edges = edges
         return
     
     @property
@@ -66,7 +74,11 @@ class WGraD:
         assert type(fitness_func) in [MethodType, FunctionType]
         self._fitness_func = fitness_func
 
-        self.graph: List[Tuple[int, int]] = []
+        self._edges: Dict[int, int] = defaultdict(lambda: None)
+        self._idx_to_sample: Dict[int, np.ndarray] = {
+            i: samples[i, :]
+            for i in range(len(samples))
+        }
         return 
     
     def cal_distance(self, method = "Euclidean"): 
@@ -119,7 +131,7 @@ class WGraD:
             score = w_grad * grad_i - w_dist * dist_i
             # find the best one
             best_idx = np.nanargmax(score)
-            self.graph.append((idx, best_idx))
+            self._edges[idx] = best_idx
             directed_graph[idx].add(best_idx)
             directed_graph[best_idx].add(idx)
         # get clusters using dfs
@@ -131,8 +143,13 @@ class WGraD:
             # a new cluster found
             if len(path) > 0:
                 path = list(path)
+                tmp_edges = [
+                    (self._idx_to_sample[node], self._idx_to_sample[self._edges[node]])
+                    for node in path
+                ]
                 cluster_result = ClusterResult(
                     indices = path, 
+                    edges = tmp_edges,
                     X = self._samples[path],
                     fitness = self._fitness[path],
                     num_dimension = self._num_dimension
