@@ -3,7 +3,7 @@
 '''
 Author       : Li Yuhao
 Date         : 2023-11-29 15:43:08
-LastEditTime : 2023-12-02 19:50:40
+LastEditTime : 2023-12-02 21:50:13
 LastEditors  : your name
 Description  : 
 FilePath     : \\WGraD\\python\\WGraD\\WGraD.py
@@ -26,8 +26,9 @@ class ClusterResult:
     def __repr__(self) -> str:
         return f"<Cluster Result> {self.num_dimension} dimension {self.num_samples} samples"
 
-    def __init__(self, X: np.ndarray, fitness: np.ndarray, num_dimension: int) -> None:
+    def __init__(self, indices: List[int], X: np.ndarray, fitness: np.ndarray, num_dimension: int) -> None:
         assert X.shape[1] == num_dimension
+        self._indices = indices
         self._X = X
         self._fitness = fitness
 
@@ -64,6 +65,8 @@ class WGraD:
         self._grad = self.cal_gradient()
         assert type(fitness_func) in [MethodType, FunctionType]
         self._fitness_func = fitness_func
+
+        self.graph: List[Tuple[int, int]] = []
         return 
     
     def cal_distance(self, method = "Euclidean"): 
@@ -102,7 +105,7 @@ class WGraD:
         """
         normalized_grad = map_min_max(self._grad)
         normalized_dist = map_min_max(self._dist)
-        graph = [set() for _ in range(self._num_samples)]
+        directed_graph = [set() for _ in range(self._num_samples)]
         for idx, point_i in enumerate(self._samples):
             # gradient item
             grad_i = normalized_grad[idx].reshape(-1)
@@ -116,18 +119,20 @@ class WGraD:
             score = w_grad * grad_i - w_dist * dist_i
             # find the best one
             best_idx = np.nanargmax(score)
-            graph[idx].add(best_idx)
-            graph[best_idx].add(idx)
+            self.graph.append((idx, best_idx))
+            directed_graph[idx].add(best_idx)
+            directed_graph[best_idx].add(idx)
         # get clusters using dfs
         viewed = set([])
         cluster_info = []
         for i in range(self._num_samples):
             path = set([])
-            dfs(i, graph, viewed, path)
+            dfs(i, directed_graph, viewed, path)
             # a new cluster found
             if len(path) > 0:
                 path = list(path)
                 cluster_result = ClusterResult(
+                    indices = path, 
                     X = self._samples[path],
                     fitness = self._fitness[path],
                     num_dimension = self._num_dimension
@@ -148,7 +153,7 @@ if __name__ == "__main__":
     np.random.seed(2023)
     # __x = np.random.random((500, 1)) * 200 - 100
 
-    __x = np.linspace(-10, 10, 100).reshape(100, 1)
+    __x = np.linspace(-100, 100, 100).reshape(100, 1)
 
 
     # Evaluate :-)
