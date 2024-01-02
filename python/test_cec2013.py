@@ -30,7 +30,7 @@ from optimizer.differential_evolution import DifferentialEvolution
 
 from WGraD import WGraD
 
-from WGraD.tools import hill_valley_test
+from WGraD.tools import filter_similar_optima
 
 def get_sample(bounds: np.ndarray, num_sample: int):
     lb_bound, ub_bound = bounds
@@ -84,7 +84,7 @@ def cec2013_test(func_id, random_seed):
                 init_pop = cluster.X,
                 init_fitness = cluster.fitness,
                 fitness_func = f.evaluate,
-                bounds = [np.min(cluster.X, axis = 0), np.max(cluster.X, axis = 0)],
+                bounds = bounds,
                 max_fes = f.get_maxfes() - fes,
                 pop_size = 50 if dimension in [10, 20] else 20,
                 F = 0.5,
@@ -103,7 +103,7 @@ def cec2013_test(func_id, random_seed):
             # update fitness evaluation times
             fes += de.fes
             # check if new optimum found
-            found_new_hill, fes = hill_valley_test(
+            found_new_hill, fes = filter_similar_optima(
                 found_optima=found_optima,
                 fit_found_optima = fit_found_optima,
                 ind_to_test = de.best_x,
@@ -111,12 +111,18 @@ def cec2013_test(func_id, random_seed):
                 fes = fes,
                 fitness_func = f.evaluate
             )
-            found_optima.append(de.best_x)
-            fit_found_optima.append(de.best_fitness)
+            # found_optima.append(de.best_x)
+            # fit_found_optima.append(de.best_fitness)
             if found_new_hill:
                 found_optima.append(de.best_x)
                 fit_found_optima.append(de.best_fitness)
-                    
+    final_optima = []
+    fit_final_optima = []
+    for _optimum, _fitness in zip(found_optima, fit_found_optima):
+        if _fitness + 0.1 >= max(fit_found_optima):
+            final_optima.append(_optimum)
+            fit_final_optima.append(_fitness)
+
     print(count)
     # check how many global optima found using how_many_goptima function
     recall = [0] * 5
@@ -136,7 +142,7 @@ def cec2013_test(func_id, random_seed):
 
 
 def main():
-    for func_id in range(9, 21):
+    for func_id in range(1, 21):
         for rep in range(1, 2):
             cec2013_test(func_id, rep)
 
